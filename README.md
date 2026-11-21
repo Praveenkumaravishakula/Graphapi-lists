@@ -8,7 +8,7 @@ The same profile call is implemented twice, once with the `MSGraphClientV3` clie
 
 Built with React function components, Fluent UI (`Persona`, `DetailsList`, `MessageBar`, `Spinner`), TypeScript, Microsoft Graph and PnPjs.
 
-![Graph profile web part in action](./assets/graph-profile.png)
+![Graph profile web part in action](./src/webparts/graphProfile/assets/graph-profile.png)
 
 ## Used SharePoint Framework Version
 
