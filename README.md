@@ -2,9 +2,13 @@
 
 ## Summary
 
-Short summary on functionality and used technologies.
+An SPFx web part that calls Microsoft Graph from SharePoint Online. It shows the signed-in user's profile (name, job title, email, office location and photo) and lists the visible lists and libraries on the current site, sorted by last modified date.
 
-[picture of the solution in action, if possible]
+The same profile call is implemented twice, once with the `MSGraphClientV3` client and once with PnPjs `graphfi()`, so the two approaches can be compared. Switch between them with the `profileSource` property.
+
+Built with React function components, Fluent UI (`Persona`, `DetailsList`, `MessageBar`, `Spinner`), TypeScript, Microsoft Graph and PnPjs.
+
+![Graph profile web part in action](./assets/graph-profile.png)
 
 ## Used SharePoint Framework Version
 
@@ -19,20 +23,24 @@ Short summary on functionality and used technologies.
 
 ## Prerequisites
 
-> Any special pre-requisites?
+- Node.js version supported by SPFx 1.20 (Node 18.x)
+- A Microsoft 365 tenant with an App Catalog
+- Permission to approve API access requests (SharePoint Administrator or Global Administrator)
+- Graph permissions requested by the package, which must be approved in **SharePoint admin center > Advanced > API access**:
+  - `User.Read`
+  - `Sites.Read.All`
 
 ## Solution
 
-| Solution    | Author(s)                                               |
-| ----------- | ------------------------------------------------------- |
-| folder name | Author details (name, company, twitter alias with link) |
+| Solution      | Author(s)                    |
+| ------------- | ---------------------------- |
+| spg-graph-api | Praveen (Ognat Software Solutions) |
 
 ## Version history
 
-| Version | Date             | Comments        |
-| ------- | ---------------- | --------------- |
-| 1.1     | March 10, 2021   | Update comment  |
-| 1.0     | January 29, 2021 | Initial release |
+| Version | Date              | Comments        |
+| ------- | ----------------- | --------------- |
+| 1.0.0.0 | November 21, 2026 | Initial release |
 
 ## Disclaimer
 
@@ -44,25 +52,42 @@ Short summary on functionality and used technologies.
 
 - Clone this repository
 - Ensure that you are at the solution folder
-- in the command-line run:
+- In the command-line run:
   - **npm install**
+  - **gulp trust-dev-cert** (first time only)
   - **gulp serve**
+- Graph calls do not work in the local workbench. Open the hosted workbench of your site instead:
+  `https://<your-tenant>.sharepoint.com/sites/<your-site>/_layouts/15/workbench.aspx`
+- To deploy:
+  - **gulp bundle --ship**
+  - **gulp package-solution --ship**
+  - Upload `sharepoint/solution/spg-graph-api.sppkg` to the App Catalog and select **Deploy**
+  - Approve `User.Read` and `Sites.Read.All` in **SharePoint admin center > Advanced > API access**
 
-> Include any additional steps as needed.
+> If you have deployed this solution before, bump the version in `config/package-solution.json` so the new permission requests appear.
 
 ## Features
 
-Description of the extension that expands upon high-level summary above.
+This web part illustrates the following concepts:
 
-This extension illustrates the following concepts:
+- Requesting Graph permissions with `webApiPermissionRequests` in `package-solution.json`
+- Getting a Graph client with `msGraphClientFactory.getClient('3')`
+- Calling `/me` and `/me/photo/$value`, with a graceful fallback when the user has no photo (404)
+- Reading a site and its lists with `/sites/{site-id}` and `/sites/{site-id}/lists`, building the site ID from the page context
+- Using PnPjs `graphfi()` with `SPFx(this.context)` as an alternative to the Graph client
+- Separating Graph calls into a service class (`GraphService`) with typed models
+- Handling errors separately for profile and lists, so a missing `Sites.Read.All` approval does not hide the profile
+- Releasing object URLs and cancelling stale async work in `useEffect`
 
-- topic 1
-- topic 2
-- topic 3
+Project structure:
 
-> Notice that better pictures and documentation will increase the sample usage and the value you are providing for others. Thanks for your submissions advance.
-
-> Share your web part with others through Microsoft 365 Patterns and Practices program to get visibility and exposure. More details on the community, open-source projects and other activities from http://aka.ms/m365pnp.
+```
+src/webparts/graphProfile
+  components/   React component and props
+  Models/       IGraphData.ts (interfaces and types)
+  Services/     GraphService.ts (Graph and PnPjs calls)
+  loc/          localized strings
+```
 
 ## References
 
